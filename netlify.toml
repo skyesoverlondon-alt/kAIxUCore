@@ -1,0 +1,13 @@
+[build]
+  functions = "netlify/functions"
+  # Leave publish blank since we deploy only functions. The UI is served
+  # from the root `public` directory via static hosting.
+  publish = "public"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[functions]
+  node_bundler = "esbuild"

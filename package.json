@@ -1,0 +1,10 @@
+{
+  "name": "kaixu-core-fortune",
+  "version": "1.0.0",
+  "description": "Enterprise‑grade brain for Skyes Over London with hybrid memory and semantic search",
+  "type": "module",
+  "dependencies": {
+    "@neondatabase/serverless": "^0.7.1",
+    "node-fetch": "^3.3.2"
+  }
+}
