@@ -1,10 +1,9 @@
 {
-  "name": "kaixu-core-fortune",
+  "name": "kaixu-brain-semantic-gateway",
+  "private": true,
   "version": "1.0.0",
-  "description": "Enterprise‑grade brain for Skyes Over London with hybrid memory and semantic search",
   "type": "module",
   "dependencies": {
-    "@neondatabase/serverless": "^0.7.1",
-    "node-fetch": "^3.3.2"
+    "@netlify/neon": "^0.1.0"
   }
 }

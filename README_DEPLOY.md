@@ -1,74 +1,75 @@
-# kAIxU Core Brain (Fortune Edition)
+# kAIxU Brain — True Semantic RAG via kAIxuGateway13
 
-This repository packages an enterprise‑grade knowledge brain that
-combines hybrid conversation memory, tenant‑scoped document storage,
-semantic search with pgvector, and a simple yet polished user interface.
+This repo is a **database-backed brain** that stores hybrid memory and performs
+**semantic retrieval** (pgvector) — but it obeys your hard rule:
 
-The **hybrid memory model** ensures that every end user has isolated
-conversation context while each business tenant maintains its own
-knowledge base. Retrieval augments prompts with both recent history and
-relevant documents via vector similarity search. A single API handles
-chat, while administrative endpoints support ingestion and health
-monitoring.
+✅ **All AI calls (chat + embeddings) route through kAIxuGateway13.**
 
-## Deployment overview
+No direct OpenAI/Anthropic/Gemini calls exist in this repo.
 
-1. **Unpack and commit** this repository into your own GitHub
-   repository or Codespace. Netlify functions require a Git‑backed
-   deployment.
+## Reality check
 
-2. **Create a Neon database**. The `schema.sql` file defines the
-   required tables and indexes. Execute its contents against your
-   database. Make sure the `vector` extension is enabled.
+**Lord kAIxu, this must be deployed via Git or it will not be useful to you.**
+It contains Netlify Functions, which require a Git-backed deploy.
 
-3. **Provision API keys**. Copy `.env.example` to `.env` and fill in
-   `NEON_DATABASE_URL` along with LLM and embedding settings. Also set
-   `KAIXU_ADMIN_TOKEN` and optionally `KAIXU_PUBLIC_API_KEY`.
+## What you get
 
-4. **Import to Netlify**. On the Netlify dashboard select “Import
-   from Git”. Set the build command to `npm install` (Netlify will
-   automatically install dependencies) and leave the publish directory
-   blank; the functions directory is set in `netlify.toml`.
+* **/api/brain** (POST) — Chat with hybrid memory + semantic RAG
+* **/api/ingest-business** (POST) — Admin-only tenant knowledge ingestion
+* **/api/health** (GET) — Health check (DB + gateway reachability)
+* **/api/client-error-report** (POST) — Optional client error logging
 
-5. **Configure environment variables**. In your Netlify site settings
-   add all variables defined in your `.env` file. At minimum this
-   includes `NEON_DATABASE_URL`, `LLM_API_KEY` (or a custom endpoint),
-   `EMBED_API_KEY`, and `KAIXU_ADMIN_TOKEN`.
+Memory model:
 
-6. **Test the brain**. Open the deployed site and use the built‑in
-   client to ping `/api/health`, send messages to `/api/brain`, and
-   ingest tenant documents via `/api/ingest-business`.
+* User isolated memory: `(userId + businessId)` stored in `conversations`
+* Business tenant docs: `businessId` stored in `tenant_docs`
+* Semantic retrieval: pgvector similarity search over stored embeddings
 
-## API summary
+## 1) Neon DB (Netlify DB / Neon extension)
 
-* **POST `/api/brain`** — main chat endpoint. Expects a JSON body
-  with `userId`, `businessId` and `message`. Optional `sessionId`
-  allows grouping of conversations. Returns an assistant reply.
+Recommended: install the **Neon extension** in Netlify for this site. That auto
+creates and injects `NETLIFY_DATABASE_URL`.
 
-* **POST `/api/ingest-business`** — admin‑only ingestion endpoint. Use
-  the `KAIXU_ADMIN_TOKEN` via an `Authorization: Bearer <token>` header
-  or an `x‑kaixu‑admin` header. Accepts `businessId`, `content`, and
-  optional `title`, `docId` and `metadata` fields. Stores documents
-  and their vector embeddings for semantic recall.
+Then apply `schema.sql` in the Neon SQL editor.
 
-* **GET `/api/health`** — returns a JSON object indicating whether
-  database connectivity, embeddings and language model services are
-  operational. Requires the public API key if one is set.
+## 2) Required environment variables
 
-* **POST `/api/client-error-report`** — optional endpoint that allows
-  client side code to report UI errors for debugging. This function
-  writes to a `client_errors` table if present.
+### Brain security
 
-## Database schema
+* `KAIXU_ADMIN_TOKEN` (required) — protects `/api/ingest-business`
+* `KAIXU_REQUIRE_KEY` (optional, default true) — if true, `/api/brain` requires a Kaixu Key
 
-The `schema.sql` file defines three tables:
+### Gateway routing
 
-* `conversations` — stores end‑user and assistant messages along with
-  optional embeddings and timestamps. Partitioning is based on
-  `user_id` and `business_id`.
-* `tenant_docs` — stores business‑scoped documents with vector
-  embeddings for semantic search.
-* `client_errors` — optional table for logging client‑side errors.
+* `KAIXU_GATEWAY_ORIGIN` (optional) — defaults to `https://skyesol.netlify.app`
+* `KAIXU_GATEWAY_PROVIDER` (optional) — defaults to `gemini`
+* `KAIXU_GATEWAY_MODEL` (optional) — defaults to `gemini-2.0-flash`
 
-If you change the embedding model dimension, adjust the `VECTOR(N)`
-size in the schema accordingly.
+### Embeddings (true semantic RAG)
+
+* `KAIXU_EMBED_PROVIDER` (optional) — defaults to `gemini`
+* `KAIXU_EMBED_MODEL` (optional) — defaults to `gemini-embedding-001`
+* `KAIXU_EMBED_DIM` (optional) — defaults to `1536` (matches schema.sql VECTOR(1536))
+
+### Database (one of these)
+
+* `NETLIFY_DATABASE_URL` (preferred auto-injected)
+* `NEON_DATABASE_URL` (fallback)
+
+## 3) How the Kaixu Key flows
+
+Your UI collects a **Kaixu Key** and sends it as `x-kaixu-key` to `/api/brain`.
+The brain forwards it to:
+
+* `/.netlify/functions/gateway-chat` → upstream `skyesol` gateway-chat
+* `/.netlify/functions/gateway-embed` → upstream `skyesol` gateway-embed
+
+Browser never calls `skyesol` directly (CORS rule).
+
+## 4) Required upstream addition
+
+To get "true semantic" embeddings, your upstream gateway must include:
+
+* `https://skyesol.netlify.app/.netlify/functions/gateway-embed`
+
+This repo includes a **GATEWAY_PATCH** folder with a reference implementation.
