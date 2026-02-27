@@ -12,8 +12,19 @@ export async function handler(event) {
     // Optional: require key for health.
     const requireKey = bool("KAIXU_REQUIRE_KEY", true);
     if (requireKey) {
-      const key = getKaixuKey(event.headers);
-      if (!key) return { statusCode: 401, headers: { ...c, "Content-Type": "application/json" }, body: JSON.stringify({ ok: false, error: "Missing Kaixu Key" }) };
+      let key = getKaixuKey(event.headers);
+      if (!key) {
+        // Try env var fallback
+        key = process.env.KAIXU_PUBLIC_API_KEY || process.env.KAIXU_KEY || "";
+      }
+      // DEBUG: Log headers and env for troubleshooting
+      console.log("[DEBUG] event.headers:", JSON.stringify(event.headers));
+      console.log("[DEBUG] KAIXU_PUBLIC_API_KEY:", process.env.KAIXU_PUBLIC_API_KEY);
+      console.log("[DEBUG] KAIXU_KEY:", process.env.KAIXU_KEY);
+      console.log("[DEBUG] Final key used:", key);
+      if (!key) {
+        return { statusCode: 401, headers: { ...c, "Content-Type": "application/json" }, body: JSON.stringify({ ok: false, error: "Missing Kaixu Key" }) };
+      }
     }
 
     let dbOk = false;
