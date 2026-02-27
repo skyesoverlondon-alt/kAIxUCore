@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>kAIxU Core</title>
+  <meta name="description" content="kAIxU Core Brain API is live. Use /api/health and /api/brain." />
+  <style>
+    :root{--bg:#05020b;--text:#efe9ff;--muted:rgba(239,233,255,.72);--purple:#7c3aed;--gold:#facc15;}
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(124,58,237,.28), transparent 60%),
+        radial-gradient(900px 600px at 85% 30%, rgba(250,204,21,.16), transparent 55%),
+        linear-gradient(180deg, #05020b, #03010a 40%, #04010c);
+    }
+    .wm{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.08;transform:rotate(-10deg)}
+    .wm img{width:min(70vw,720px);height:auto;filter:drop-shadow(0 0 40px rgba(124,58,237,.45))}
+    .wrap{max-width:980px;margin:0 auto;padding:28px 18px;position:relative}
+    .logo{width:74px;height:74px;object-fit:contain;filter:drop-shadow(0 0 18px rgba(124,58,237,.6)) drop-shadow(0 0 12px rgba(250,204,21,.25));animation:pulse 2.8s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+    h1{margin:14px 0 6px;font-size:22px;letter-spacing:.3px}
+    p{margin:0 0 14px;color:var(--muted);line-height:1.45}
+    .card{margin-top:16px;padding:14px 14px;border:1px solid rgba(250,204,21,.18);border-radius:16px;background:rgba(0,0,0,.22)}
+    code{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;color:rgba(239,233,255,.86)}
+    a{color:rgba(250,204,21,.92);text-decoration:none} a:hover{text-decoration:underline}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{display:inline-block;padding:10px 12px;border-radius:14px;border:1px solid rgba(250,204,21,.22);
+      background:linear-gradient(180deg, rgba(124,58,237,.92), rgba(124,58,237,.68));color:white;font-weight:800}
+    .btn2{background:linear-gradient(180deg, rgba(250,204,21,.92), rgba(250,204,21,.68));color:#1a1200}
+  </style>
+</head>
+<body>
+  <div class="wm" aria-hidden="true">
+    <img src="https://cdn1.sharemyimage.com/2026/02/16/logo1_transparent.png" alt="" />
+  </div>
+
+  <div class="wrap">
+    <img class="logo" src="https://cdn1.sharemyimage.com/2026/02/16/logo1_transparent.png" alt="Skyes Over London LC" />
+    <h1>kAIxU Core is Live</h1>
+    <p>This site publishes Netlify Functions under <code>/api/*</code>. If you can load this page, your publish directory exists and deploy can succeed.</p>
+
+    <div class="card">
+      <p style="margin:0 0 8px;">Endpoints:</p>
+      <p style="margin:0 0 6px;"><code>GET /api/health</code></p>
+      <p style="margin:0 0 6px;"><code>POST /api/brain</code></p>
+      <p style="margin:0;"><code>POST /api/ingest-business</code> (admin)</p>
+
+      <div class="row">
+        <a class="btn btn2" href="/api/health">Ping Health</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
